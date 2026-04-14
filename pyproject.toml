@@ -1,0 +1,85 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+# =========================
+# 프로젝트 기본 정보
+# =========================
+[project]
+name = "adr-mission"
+version = "0.1.0"
+description = "ADR mission simulation and optimization framework (Python + MATLAB visualization)"
+authors = [
+    { name = "Your Name" }
+]
+readme = "README.md"
+requires-python = ">=3.12"
+
+# 핵심 dependency (지금 subgoal + 미래 확장 최소 세트)
+dependencies = [
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "matplotlib>=3.8",
+    "pandas>=2.0",
+    "pyyaml>=6.0"
+]
+
+# =========================
+# Optional dependencies
+# =========================
+[project.optional-dependencies]
+
+# 머신러닝 (나중 단계)
+ml = [
+    "torch>=2.0",
+    "scikit-learn>=1.3"
+]
+
+# 개발 도구
+dev = [
+    "pytest>=7.0",
+    "black>=23.0",
+    "isort>=5.12",
+    "mypy>=1.0"
+]
+
+# 추가 시각화 (선택)
+viz = [
+    "plotly>=5.0"
+]
+
+# =========================
+# setuptools 설정 (src 구조)
+# =========================
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# =========================
+# 코드 스타일
+# =========================
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+# =========================
+# 타입 체크
+# =========================
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+warn_unused_configs = true
+
+# =========================
+# pytest 설정
+# =========================
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
