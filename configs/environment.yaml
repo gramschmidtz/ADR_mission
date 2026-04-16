@@ -1,0 +1,15 @@
+# Environment / physical constants
+planet:
+  name: Earth
+  mu_km3_s2: 398600.4418
+  re_km: 6378.14
+  g0_m_s2: 9.8066
+  zonals:
+    j2: 1.082639e-3
+    j3: -2.565e-6
+    j4: -1.608e-6
+
+atmosphere:
+  model: exponential
+  rho0_kg_m3: 1.225
+  scale_height_km: 8.5

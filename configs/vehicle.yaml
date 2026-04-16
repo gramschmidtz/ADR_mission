@@ -1,0 +1,13 @@
+# Chaser / propulsion defaults from the paper
+spacecraft:
+  wet_mass_kg: 400.0
+  propellant_mass_kg: 100.0
+  drag_coefficient: 2.2
+  area_m2: 8.0
+
+propulsion:
+  type: SEP
+  thrust_max_N: 0.021
+  isp_s: 2000.0
+  duty_cycle: 0.60
+  eclipse_half_angle_deg: 36.0

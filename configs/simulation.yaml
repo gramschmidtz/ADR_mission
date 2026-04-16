@@ -1,0 +1,11 @@
+simulation:
+  state_representation: mee
+  input_state_representation_options: [mee, cartesian, keplerian]
+  time_step_s: 10.0
+  t0_s: 0.0
+  tf_s: 86400.0
+  integrator: rk4
+  export_cartesian_history: true
+  checks:
+    enforce_positive_mass: true
+    enforce_positive_q: true
