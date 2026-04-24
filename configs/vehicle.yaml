@@ -1,6 +1,6 @@
 # configs/vehicle.yaml
 propulsion:
-  T_max_N: 0.021 # 최대 추력 [N] (21 mN)
+  T_max_N: 2.1 # 최대 추력 [N] (21 mN) 원래는 0.021이어야 하는데 잘 안보임
   I_sp_s: 2000.0 # 비추력 [s]
   m_0_kg: 400.0  # 초기 질량 [kg] (wet mass)
   C_D: 2.2       # 항력 계수

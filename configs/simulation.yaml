@@ -1,6 +1,6 @@
 # configs/simulation.yaml
 initial_states:
-  alt0_km: 250.0 # 초기 고도 [km] (p 대체)
+  alt0_km: 500.0 # 초기 고도 [km] (p 대체)
   f: 0.0
   g: 0.0
   h: 0.176
@@ -9,5 +9,8 @@ initial_states:
 
 simulation_time:
   dt: 60.0 # 스텝 [s]
-  total_time: 50.0 # [h]
-  
+  total_time: 72.0 # [h]
+
+spacecraft:
+  onoff: "on" # "on"이면 spacedebris와 spacecraft같이 궤적, "off"이면 spacedebris만
+  test_input: [0.0, 1.0, 0.0] # (N_r, N_theta, N_h) 형태의 방향 제어 입력 [무차원]
