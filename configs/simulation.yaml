@@ -1,11 +1,11 @@
 # configs/simulation.yaml
 initial_states:
-  alt0_km: 500.0 # 초기 고도 [km] (p 대체)
-  f: 0.0
-  g: 0.0
-  h: 0.176
-  k: 0.0
-  L: 0.0
+  alt0_km: 500.0  # 초기 고도 [km] (a 대체)
+  e: 0.0          # [무차원] (0은 원궤도)
+  i: 20.0         # [degree]
+  RAAN: 0.0       # [degree]
+  AOP: 0.0        # [degree]
+  nu: 0.0         # [degree]
 
 simulation_time:
   dt: 60.0 # 스텝 [s]

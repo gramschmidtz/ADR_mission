@@ -6,7 +6,7 @@ import numpy as np
 from tqdm import tqdm
 from scipy.io import savemat
 
-from adr_mission.states import MEEState
+from adr_mission.utils import ke_to_mee
 from adr_mission.logger import MissionTrajectory
 from adr_mission.propagation import rk4
 from adr_mission.dynamics import SpaceObject, Spacecraft
@@ -27,16 +27,17 @@ def main():
     alt0 = simulation_cfg['initial_states']['alt0_km'] * 1000.0
     a = R_e + alt0
     
-    # MEE 초기값
-    p_init = torch.tensor([[a]], dtype=torch.float32)
-    f_init = torch.tensor([[simulation_cfg['initial_states']['f']]], dtype=torch.float32)
-    g_init = torch.tensor([[simulation_cfg['initial_states']['g']]], dtype=torch.float32)
-    h_init = torch.tensor([[simulation_cfg['initial_states']['h']]], dtype=torch.float32)
-    k_init = torch.tensor([[simulation_cfg['initial_states']['k']]], dtype=torch.float32)
-    L_init = torch.tensor([[simulation_cfg['initial_states']['L']]], dtype=torch.float32)
+    # KE 초기값
+    a_init = torch.tensor([[a]], dtype=torch.float32)
+    e_init = torch.tensor([[simulation_cfg['initial_states']['e']]], dtype=torch.float32)
+    i_init = torch.tensor([[simulation_cfg['initial_states']['i']]], dtype=torch.float32)
+    RAAN_init = torch.tensor([[simulation_cfg['initial_states']['RAAN']]], dtype=torch.float32)
+    AOP_init = torch.tensor([[simulation_cfg['initial_states']['AOP']]], dtype=torch.float32)
+    nu_init = torch.tensor([[simulation_cfg['initial_states']['nu']]], dtype=torch.float32)
     m_init = torch.tensor([[vehicle_cfg['propulsion']['m_0_kg']]], dtype=torch.float32)
-
-    initial_state = MEEState(p=p_init, f=f_init, g=g_init, h=h_init, k=k_init, L=L_init, mass=m_init)
+    
+    # MEE 초기값
+    initial_state = ke_to_mee(a_init, e_init, i_init, RAAN_init, AOP_init, nu_init, m_init)
 
     # 3. 시뮬레이션 환경 구성
     device = "cpu"

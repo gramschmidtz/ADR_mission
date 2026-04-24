@@ -3,6 +3,35 @@
 from __future__ import annotations
 
 import torch
+from .states import MEEState
+
+def make_unit_vector(vector):
+    return vector / torch.linalg.norm(vector, ord=2, dim=-1, keepdim=True)
+
+def ke_to_mee(a, e, i, RAAN, AOP, nu, mass) -> MEEState:
+    """
+    a [km]
+    e [무차원]
+    i [degree]
+    RAAN [degree]
+    AOP [degree]
+    nu [degree]
+    mass [kg]
+    """
+    i_rad = torch.deg2rad(i)
+    RAAN_rad = torch.deg2rad(RAAN)
+    AOP_rad = torch.deg2rad(AOP)
+    nu_rad = torch.deg2rad(nu)
+
+    p = a * (1 - e**2)
+    f = e * torch.cos(RAAN_rad + AOP_rad)
+    g = e * torch.sin(RAAN_rad + AOP_rad)
+    h = torch.tan(i_rad/2) * torch.cos(RAAN_rad)
+    k = torch.tan(i_rad/2) * torch.sin(RAAN_rad)
+    L = RAAN_rad + AOP_rad + nu_rad
+
+    return MEEState(p,f,g,h,k,L,mass)
+
 
 def mee_to_eci(p,f,g,h,k,L, mu) -> torch.Tensor:
     """
@@ -30,9 +59,6 @@ def mee_to_eci(p,f,g,h,k,L, mu) -> torch.Tensor:
     velocity = torch.cat([vx, vy, vz], dim=-1)
     
     return position, velocity
-
-def make_unit_vector(vector):
-    return vector / torch.linalg.norm(vector, ord=2, dim=-1, keepdim=True)
 
 def P2sinphi(r):
     sinphi = r[:,2:3] / torch.linalg.norm(r, ord=2, dim=-1, keepdim=True)
