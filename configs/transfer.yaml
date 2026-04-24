@@ -1,9 +1,0 @@
-transfer:
-  disposal_altitude_km: 390.0
-  capture_stay_time_days: 30.0
-  inclination_deg: 87.9
-  phasing:
-    alpha_default: 0.5
-    alpha_grid: [0.0, 0.5, 0.95, 1.0]
-    phasing_altitude_min_km: 390.0
-    objective: alpha * delta_v_total + (1 - alpha) * total_time

@@ -1,6 +1,0 @@
-sequence_search:
-  debris_database_size: 5000
-  breadth_keep: 100
-  mission_duration_limit_years: 10.0
-  objective_modes: [min_tof, min_propellant, weighted]
-  weighted_alpha_candidates: [0.0, 0.95, 1.0]
