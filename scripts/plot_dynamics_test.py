@@ -6,6 +6,7 @@ import numpy as np
 from tqdm import tqdm
 from scipy.io import savemat
 
+from adr_mission.states import KEState
 from adr_mission.utils import ke_to_mee
 from adr_mission.logger import MissionTrajectory
 from adr_mission.propagation import rk4
@@ -36,8 +37,10 @@ def main():
     nu_init = torch.tensor([[simulation_cfg['initial_states']['nu']]], dtype=torch.float32)
     m_init = torch.tensor([[vehicle_cfg['propulsion']['m_0_kg']]], dtype=torch.float32)
     
+    ke_init = KEState(a_init, e_init, i_init, RAAN_init, AOP_init, nu_init, m_init)
+
     # MEE 초기값
-    initial_state = ke_to_mee(a_init, e_init, i_init, RAAN_init, AOP_init, nu_init, m_init)
+    initial_state = ke_to_mee(ke_init)
 
     # 3. 시뮬레이션 환경 구성
     device = "cpu"

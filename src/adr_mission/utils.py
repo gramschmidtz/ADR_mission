@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import torch
-from .states import MEEState
+from .states import MEEState, KEState
 
 def make_unit_vector(vector):
     return vector / torch.linalg.norm(vector, ord=2, dim=-1, keepdim=True)
 
-def ke_to_mee(a, e, i, RAAN, AOP, nu, mass) -> MEEState:
+def ke_to_mee(state:KEState) -> MEEState:
     """
     a [km]
     e [무차원]
@@ -18,6 +18,14 @@ def ke_to_mee(a, e, i, RAAN, AOP, nu, mass) -> MEEState:
     nu [degree]
     mass [kg]
     """
+    a = state.a
+    e = state.e
+    i = state.i
+    RAAN = state.RAAN
+    AOP = state.AOP
+    nu = state.nu
+    mass = state.mass
+
     i_rad = torch.deg2rad(i)
     RAAN_rad = torch.deg2rad(RAAN)
     AOP_rad = torch.deg2rad(AOP)
@@ -32,12 +40,36 @@ def ke_to_mee(a, e, i, RAAN, AOP, nu, mass) -> MEEState:
 
     return MEEState(p,f,g,h,k,L,mass)
 
+def mee_to_ke(state:MEEState) -> KEState:
+    p = state.p
+    f = state.f
+    g = state.g
+    h = state.h
+    k = state.k
+    L = state.L
+    mass = state.mass
 
-def mee_to_eci(p,f,g,h,k,L, mu) -> torch.Tensor:
+    e = torch.sqrt(f**2 + g**2)
+    a = p/(1-e**2)
+    i = 2*torch.atan(torch.sqrt(h**2+k**2))
+    RAAN = torch.atan2(h,k)
+    AOP = torch.atan2(g,f) - RAAN
+    nu = L - torch.atan2(g,f)
+
+    return KEState(a,e,i,RAAN,AOP,nu,mass)
+
+def mee_to_eci(state:MEEState, mu) -> torch.Tensor:
     """
     MEE (p,f,g,h,k,L)에서
     ECI frame의 r (x,y,z), v (vx,vy,vz)으로 변환
     """
+    p = state.p
+    f = state.f
+    g = state.g
+    h = state.h
+    k = state.k
+    L = state.L
+
     q = 1 + f * torch.cos(L) + g * torch.sin(L)
     r = p / q
     chi = torch.sqrt(h**2 + k**2)

@@ -89,7 +89,7 @@ class SpaceObject:
         r_norm = p/q
         s2 = 1 + h**2 + k**2
 
-        r, v = mee_to_eci(p,f,g,h,k,L, mu=self.mu)
+        r, v = mee_to_eci(state, mu=self.mu)
         i_r = make_unit_vector(r)
 
         rcv = torch.cross(r, v, dim=-1)
@@ -128,7 +128,7 @@ class SpaceObject:
 
         SCD = self.S * self.C_D
 
-        r, v = mee_to_eci(p,f,g,h,k,L, mu=self.mu)
+        r, v = mee_to_eci(state, mu=self.mu)
         r_norm = torch.linalg.norm(r, ord=2, dim=-1, keepdim=True)
         height =  r_norm - self.R_e
         rho = make_rho(height, self.rho_0, self.h_0, self.H)

@@ -65,3 +65,42 @@ class Trajectory:
             'states': self.data.cpu().numpy(), # [Time, Batch, 7]
             'time': self.times.cpu().numpy()
         })
+
+@dataclass
+class KEState:
+    a: torch.Tensor # (...,1)
+    e: torch.Tensor # (...,1)
+    i: torch.Tensor # (...,1)
+    RAAN: torch.Tensor # (...,1)
+    AOP: torch.Tensor # (...,1)
+    nu: torch.Tensor # (...,1)
+    mass: torch.Tensor # (...,1)
+
+    def to_tensor(self):
+        return torch.cat(
+            [
+                self.a,
+                self.e,
+                self.i,
+                self.RAAN,
+                self.AOP,
+                self.nu,
+                self.mass
+            ],
+            dim=-1
+        )
+    
+    @classmethod
+    def from_tensor(cls, tensor: torch.Tensor):
+        return cls(
+            a = tensor[:,0:1],
+            e = tensor[:,1:2],
+            i = tensor[:,2:3],
+            RAAN = tensor[:,3:4],
+            AOP = tensor[:,4:5],
+            nu = tensor[:,5:6],
+            mass = tensor[:,6:7]
+        )
+    
+    def to_device(self, device: str):
+        return KEState(**{k: v.to(device) for k,v in self.__dict__.items()})
