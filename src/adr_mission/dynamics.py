@@ -145,8 +145,8 @@ class SpaceObject:
     def dynamics_model(
                 self,
                 x: torch.Tensor,
-                u: torch.Tensor,
-                t: float  # t 인자 추가 (rk4와 인터페이스 맞춤)
+                u: torch.Tensor,  # (rk4와 인터페이스 맞춤)
+                t: float          # (rk4와 인터페이스 맞춤)
         ) -> torch.Tensor:
         state = MEEState.from_tensor(x)
 
