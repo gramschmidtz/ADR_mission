@@ -10,7 +10,7 @@ def make_unit_vector(vector):
 
 def ke_to_mee(state:KEState) -> MEEState:
     """
-    a [km]
+    a [m]
     e [무차원]
     i [degree]
     RAAN [degree]

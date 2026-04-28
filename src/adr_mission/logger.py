@@ -5,10 +5,10 @@ from __future__ import annotations
 import torch
 from .states import MEEState
 
-class MissionTrajectory:
-    def __init__(self, num_steps: int, batch_size: int, device: str = "cpu"):
-        # [Time, Batch, Features(7)] 형태의 텐서 미리 할당
-        self.storage = torch.zeros((num_steps, batch_size, 7), device=device)
+class ObjectTrajectory:
+    def __init__(self, num_steps: int, batch_size: int, num_features: int, device: str = "cpu"):
+        # [Time, Batch, Features(state개수)] 형태의 텐서 미리 할당
+        self.storage = torch.zeros((num_steps, batch_size, num_features), device=device)
         self.time_storage = torch.zeros((num_steps,), device=device)
         self.step = 0
 

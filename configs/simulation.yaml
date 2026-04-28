@@ -2,7 +2,7 @@
 initial_states:
   alt0_km: 500.0  # 초기 고도 [km] (a 대체)
   e: 0.0          # [무차원] (0은 원궤도)
-  i: 20.0         # [degree]
+  i: 50.0         # [degree]
   RAAN: 0.0       # [degree]
   AOP: 0.0        # [degree]
   nu: 0.0         # [degree]

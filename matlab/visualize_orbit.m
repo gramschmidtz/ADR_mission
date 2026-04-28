@@ -17,6 +17,24 @@ R_e = 6378.14; % km
 [x_sphere, y_sphere, z_sphere] = sphere(50);
 surf(x_sphere*R_e, y_sphere*R_e, z_sphere*R_e, 'EdgeColor', 'none', 'FaceColor', '[0.2 0.5 0.8]', 'FaceAlpha', 0.4);
 
+% 적도면
+plane_lim = R_e * 3; % 궤적 크기에 맞춰 조절하세요
+fill3([-plane_lim plane_lim plane_lim -plane_lim], ...
+      [-plane_lim -plane_lim plane_lim plane_lim], ...
+      [0 0 0 0], 'c', 'FaceAlpha', 0.5, 'EdgeColor', 'none', 'DisplayName', 'Equatorial Plane');
+
+theta_line = linspace(0, 2*pi, 100);
+x_eq = R_e * cos(theta_line);
+y_eq = R_e * sin(theta_line);
+z_eq = zeros(size(theta_line));
+
+% 적도선 그리기 (검정색 실선 또는 노란색 등으로 강조)
+plot3(x_eq, y_eq, z_eq, 'k-', 'LineWidth', 2, 'DisplayName', 'Equator');
+
+% (선택 사항) 위도/경도 가이드라인 추가 (격자감 형성)
+% 90도 간격의 경도선 하나 추가 (X-Z 평면)
+plot3(x_eq, z_eq, y_eq, 'k:', 'LineWidth', 0.5, 'HandleVisibility', 'off');
+
 % 파편(Debris) 플롯 (파란색 실선)
 mee_deb = squeeze(debris_states(:, 1, :));
 [X_deb, Y_deb, Z_deb] = mee2cartesian(mee_deb);
