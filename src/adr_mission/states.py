@@ -10,7 +10,139 @@ from dataclasses import dataclass
 from scipy.io import savemat
 
 @dataclass
-class OrbitState:
+class KEState:
+    a: torch.Tensor # (...,1)
+    e: torch.Tensor # (...,1)
+    i: torch.Tensor # (...,1)
+    raan: torch.Tensor # (...,1)
+    aop: torch.Tensor # (...,1)
+    nu: torch.Tensor # (...,1)
+    mass: torch.Tensor # (...,1)
+
+    def to_tensor(self):
+        return torch.cat(
+            [
+                self.a,
+                self.e,
+                self.i,
+                self.raan,
+                self.aop,
+                self.nu,
+                self.mass
+            ],
+            dim=-1
+        )
+
+    @classmethod
+    def from_tensor(cls, tensor: torch.Tensor):
+        return cls(
+            a = tensor[:,0:1],
+            e = tensor[:,1:2],
+            i = tensor[:,2:3],
+            raan = tensor[:,3:4],
+            aop = tensor[:,4:5],
+            nu = tensor[:,5:6],
+            mass = tensor[:,6:7]
+        )
+    
+    def get_mee(self) -> MEEState:
+        p = self.a*(1-self.e**2)
+        f = self.e*torch.cos(self.raan+self.aop)
+        g = self.e*torch.sin(self.raan+self.aop)
+        h = torch.tan(self.i/2)*torch.cos(self.raan)
+        k = torch.tan(self.i/2)*torch.sin(self.raan)
+        L = self.raan+self.aop+self.nu
+        return MEEState(p,f,g,h,k,L,self.mass)
+    
+    def get_eci(self, mu : float) -> ECIState:
+        mee = self.get_mee()
+        return mee.get_eci(mu)
+
+@dataclass
+class ECIState:
+    x: torch.Tensor # (...,1)
+    y: torch.Tensor # (...,1)
+    z: torch.Tensor # (...,1)
+    vx: torch.Tensor # (...,1)
+    vy: torch.Tensor # (...,1)
+    vz: torch.Tensor # (...,1)
+    mass: torch.Tensor # (...,1)
+
+    def to_tensor(self):
+        return torch.cat(
+            [
+                self.x,
+                self.y,
+                self.z,
+                self.vx,
+                self.vy,
+                self.vz,
+                self.mass
+            ],
+            dim=-1
+        )
+
+    @classmethod
+    def from_tensor(cls, tensor: torch.Tensor):
+        return cls(
+            x = tensor[:,0:1],
+            y = tensor[:,1:2],
+            z = tensor[:,2:3],
+            vx = tensor[:,3:4],
+            vy = tensor[:,4:5],
+            vz = tensor[:,5:6],
+            mass = tensor[:,6:7]
+        )
+    
+    def get_ke(self, mu : float) -> KEState:
+        """
+        ECI -> KE 변환 (Vectorial elements 활용)
+        """
+        r_vec = torch.stack([self.x, self.y, self.z], dim=-1).squeeze(1) # (B, 3)
+        v_vec = torch.stack([self.vx, self.vy, self.vz], dim=-1).squeeze(1)
+        
+        r_mag = torch.norm(r_vec, dim=-1, keepdim=True)
+        v_mag = torch.norm(v_vec, dim=-1, keepdim=True)
+        
+        # Specific Angular Momentum
+        h_vec = torch.cross(r_vec, v_vec, dim=-1)
+        h_mag = torch.norm(h_vec, dim=-1, keepdim=True)
+        
+        # Semi-major axis
+        energy = (v_mag**2 / 2) - (mu / r_mag)
+        a = -mu / (2 * energy)
+        
+        # Eccentricity vector
+        e_vec = (torch.cross(v_vec, h_vec, dim=-1) / mu) - (r_vec / r_mag)
+        e = torch.norm(e_vec, dim=-1, keepdim=True)
+        
+        # Inclination
+        i = torch.acos(h_vec[:, 2:3] / h_mag)
+        
+        # RAAN (Node vector n)
+        k_unit = torch.tensor([0, 0, 1.0], device=r_vec.device)
+        n_vec = torch.cross(k_unit.expand_as(h_vec), h_vec, dim=-1)
+        n_mag = torch.norm(n_vec, dim=-1, keepdim=True)
+        raan = torch.where(n_mag > 1e-9, torch.atan2(n_vec[:, 1:2], n_vec[:, 0:1]), torch.zeros_like(i))
+        
+        # Argument of Periapsis
+        aop = torch.where(n_mag > 1e-9, 
+                          torch.acos(torch.sum(n_vec * e_vec, dim=-1, keepdim=True) / (n_mag * e)),
+                          torch.atan2(e_vec[:, 1:2], e_vec[:, 0:1]))
+        aop = torch.where(e_vec[:, 2:3] < 0, 2*torch.pi - aop, aop)
+        
+        # True Anomaly
+        nu = torch.acos(torch.sum(e_vec * r_vec, dim=-1, keepdim=True) / (e * r_mag))
+        nu = torch.where(torch.sum(r_vec * v_vec, dim=-1, keepdim=True) < 0, 2*torch.pi - nu, nu)
+        
+        return KEState(a, e, i, raan, aop, nu, self.mass)
+
+    def get_mee(self, mu: float) -> MEEState:
+        ke = self.get_ke(mu)
+        return ke.get_mee()
+
+@dataclass
+class MEEState:
     p: torch.Tensor # (...,1)
     f: torch.Tensor # (...,1)
     g: torch.Tensor # (...,1)
@@ -45,7 +177,7 @@ class OrbitState:
             mass = tensor[:,6:7]
         )
     
-    def get_eci(self, mu: float):
+    def get_eci(self, mu: float) -> ECIState:
         """
         MEE -> ECI Cartisian (r,v) 변환
         """
@@ -66,19 +198,19 @@ class OrbitState:
         vy = -(sqrt_mu_p/s2) * (-cosL + alpha2*cosL + 2*self.h*self.k*sinL - self.f + self.g*alpha2 + 2*self.f*self.h*self.k)
         vz = (2*sqrt_mu_p/s2) * (self.h*cosL + self.k*sinL + self.f*self.h + self.g*self.k)
         
-        return torch.cat([x, y, z], dim=-1), torch.cat([vx, vy, vz], dim=-1)
+        return ECIState(x, y, z, vx, vy, vz, self.mass)
 
-    def get_ke(self):
+    def get_ke(self) -> KEState:
             """
             MEE -> KE 변환
             """
-            ecc = torch.sqrt(self.f**2 + self.g**2)
-            a = self.p / (1 - ecc**2)
-            inc = 2 * torch.atan(torch.sqrt(self.h**2 + self.k**2))
+            e = torch.sqrt(self.f**2 + self.g**2)
+            a = self.p / (1 - e**2)
+            i = 2 * torch.atan(torch.sqrt(self.h**2 + self.k**2))
             raan = torch.atan2(self.h, self.k)
             aop = torch.atan2(self.g,self.f) - raan
             nu = self.L - torch.atan2(self.g,self.f)
-            return a, ecc, inc, raan, aop, nu
+            return KEState(a, e, i, raan, aop, nu, self.mass)
 
 """"
 class Trajectory:
