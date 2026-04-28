@@ -19,12 +19,12 @@ class SpaceObject:
         self.mu = constants_cfg['physics']['mu_km3_per_s2']
         self.g_e = constants_cfg['physics']['g_e_m_per_s2']
         self.J_2 = constants_cfg['physics']['J_2']
-        self.R_e = constants_cfg['physics']['R_e_m']
+        self.R_e = constants_cfg['physics']['R_e_km']
         self.h_0 = constants_cfg['atmosphere']['h_0']
         self.rho_0 = constants_cfg['atmosphere']['rho_0']
         self.H = constants_cfg['atmosphere']['H']
 
-        self.S = vehicle_cfg['propulsion']['S_m2']
+        self.S = vehicle_cfg['propulsion']['S_km2']
         self.C_D = vehicle_cfg['propulsion']['C_D']
         
 

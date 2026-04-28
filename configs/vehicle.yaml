@@ -4,6 +4,6 @@ propulsion:
   I_sp_s: 2000.0  # 비추력 [s]
   m_0_kg: 400.0   # 초기 질량 [kg] (wet mass)
   C_D: 2.2        # 항력 계수
-  S_m2: 0.000008  # 단면적 [km^2]
+  S_km2: 0.000008  # 단면적 [km^2]
   
   propellant_mass_kg: 100.0

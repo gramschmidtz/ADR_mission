@@ -24,7 +24,7 @@ def main():
         simulation_cfg = yaml.safe_load(h)
 
     # 2. 초기 궤도 상태 설정
-    R_e = constants_cfg['physics']['R_e_m']
+    R_e = constants_cfg['physics']['R_e_km']
     alt0 = simulation_cfg['initial_states']['alt0_km'] * 1000.0
     a = R_e + alt0
     
