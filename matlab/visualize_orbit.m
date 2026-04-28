@@ -38,13 +38,13 @@ surf(x_sphere*R_e, y_sphere*R_e, z_sphere*R_e, 'EdgeColor', 'none', 'FaceColor',
 % 파편(Debris) 플롯 (파란색 실선)
 mee_deb = squeeze(debris_states(:, 1, :));
 [X_deb, Y_deb, Z_deb] = mee2cartesian(mee_deb);
-plot3(X_deb/1e3, Y_deb/1e3, Z_deb/1e3, 'b-', 'LineWidth', 1.5, 'DisplayName', 'Space Debris (No Thrust)');
+plot3(X_deb, Y_deb, Z_deb, 'b-', 'LineWidth', 1.5, 'DisplayName', 'Space Debris (No Thrust)');
 
 % 위성(Chaser) 데이터가 있는지 확인하고 플롯 (빨간색 점선)
 if exist('chaser_states', 'var')
     mee_cha = squeeze(chaser_states(:, 1, :));
     [X_cha, Y_cha, Z_cha] = mee2cartesian(mee_cha);
-    plot3(X_cha/1e3, Y_cha/1e3, Z_cha/1e3, 'r--', 'LineWidth', 1.5, 'DisplayName', 'Spacecraft (Thrust ON)');
+    plot3(X_cha, Y_cha, Z_cha, 'r--', 'LineWidth', 1.5, 'DisplayName', 'Spacecraft (Thrust ON)');
 end
 
 xlabel('X (km)'); ylabel('Y (km)'); zlabel('Z (km)');

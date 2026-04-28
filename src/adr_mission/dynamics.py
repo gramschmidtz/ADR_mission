@@ -16,7 +16,7 @@ class SpaceObject:
     def __init__(self, vehicle_cfg, constants_cfg):
         self.vehicle_cfg = vehicle_cfg
         self.constants_cfg = constants_cfg
-        self.mu = constants_cfg['physics']['mu_m3_per_s2']
+        self.mu = constants_cfg['physics']['mu_km3_per_s2']
         self.g_e = constants_cfg['physics']['g_e_m_per_s2']
         self.J_2 = constants_cfg['physics']['J_2']
         self.R_e = constants_cfg['physics']['R_e_m']
@@ -137,8 +137,8 @@ class SpaceObject:
         v_r = torch.sqrt(self.mu/p) * (f * torch.sin(L) - g * torch.cos(L))
         v_theta = torch.sqrt(self.mu/p) * (1 + f * torch.cos(L) + g * torch.sin(L))
 
-        a_D_r = -0.5 * rho * SCD * v_norm * v_r
-        a_D_theta = -0.5 * rho * SCD * v_norm * v_theta
+        a_D_r = -0.5 * rho * SCD * v_norm * v_r / state.mass
+        a_D_theta = -0.5 * rho * SCD * v_norm * v_theta / state.mass
 
         return torch.cat([a_D_r, a_D_theta, torch.zeros_like(a_D_r)], dim=-1)
 
@@ -188,7 +188,7 @@ class Spacecraft(SpaceObject):
         a_env = self._a_g(state) + self._a_D(state)
         
         # 추력(u) 더하기
-        a_T = (self.T_max/state.mass) * u
+        a_T = (self.T_max/state.mass/1000.0) * u
         a_total = a_T + a_env
 
         # 궤도 요소 변화율 계산

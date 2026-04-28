@@ -10,7 +10,7 @@ from .utils import mee_to_ke
 class RAANTransfer:
     def __init__(self, constants_cfg):
         self.constants_cfg = constants_cfg
-        self.mu = constants_cfg['physics']['mu_m3_per_s2']
+        self.mu = constants_cfg['physics']['mu_km3_per_s2']
         self.J_2 = constants_cfg['physics']['J_2']
         self.R_e = constants_cfg['physics']['R_e_m']        
 
