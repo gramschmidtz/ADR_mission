@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from scipy.io import savemat
 
 @dataclass
-class MEEState:
+class OrbitState:
     p: torch.Tensor # (...,1)
     f: torch.Tensor # (...,1)
     g: torch.Tensor # (...,1)
@@ -45,9 +45,42 @@ class MEEState:
             mass = tensor[:,6:7]
         )
     
-    def to_device(self, device: str):
-        return MEEState(**{k: v.to(device) for k,v in self.__dict__.items()})
+    def get_eci(self, mu: float):
+        """
+        MEE -> ECI Cartisian (r,v) 변환
+        """
+        q = 1 + self.f * torch.cos(self.L) + self.g * torch.sin(self.L)
+        r_mag = self.p / q
+        alpha2 = self.h**2 - self.k**2
+        s2 = 1 + self.h**2 + self.k**2
+        cosL, sinL = torch.cos(self.L), torch.sin(self.L)
 
+        # Position (r) 
+        x = (r_mag/s2) * (cosL + alpha2*cosL + 2*self.h*self.k*sinL)
+        y = (r_mag/s2) * (sinL - alpha2*sinL + 2*self.h*self.k*cosL)
+        z = (2*r_mag/s2) * (self.h*sinL - self.k*cosL)
+        
+        # Velocity (v)
+        sqrt_mu_p = torch.sqrt(mu / self.p)
+        vx = -(sqrt_mu_p/s2) * (sinL + alpha2*sinL - 2*self.h*self.k*cosL + self.g - self.f*alpha2 + 2*self.g*self.h*self.k)
+        vy = -(sqrt_mu_p/s2) * (-cosL + alpha2*cosL + 2*self.h*self.k*sinL - self.f + self.g*alpha2 + 2*self.f*self.h*self.k)
+        vz = (2*sqrt_mu_p/s2) * (self.h*cosL + self.k*sinL + self.f*self.h + self.g*self.k)
+        
+        return torch.cat([x, y, z], dim=-1), torch.cat([vx, vy, vz], dim=-1)
+
+    def get_ke(self):
+            """
+            MEE -> KE 변환
+            """
+            ecc = torch.sqrt(self.f**2 + self.g**2)
+            a = self.p / (1 - ecc**2)
+            inc = 2 * torch.atan(torch.sqrt(self.h**2 + self.k**2))
+            raan = torch.atan2(self.h, self.k)
+            aop = torch.atan2(self.g,self.f) - raan
+            nu = self.L - torch.atan2(self.g,self.f)
+            return a, ecc, inc, raan, aop, nu
+
+""""
 class Trajectory:
     def __init__(self, num_steps: int, batch_size: int, device: str):
         self.data = torch.zeros((num_steps, batch_size, 7), device=device)
@@ -104,3 +137,4 @@ class KEState:
     
     def to_device(self, device: str):
         return KEState(**{k: v.to(device) for k,v in self.__dict__.items()})
+"""
